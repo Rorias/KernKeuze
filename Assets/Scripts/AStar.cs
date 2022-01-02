@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -34,7 +33,10 @@ public class AStar
 
     public Tilemap collTM;
 
-    public List<Vector2> FindPathToTarget(Vector2Int _startPos, Vector2Int _endPos, Cell[,] _map)
+    private int mapLengthX;
+    private int mapLengthY;
+
+    public List<Vector2> FindPathToTarget(Vector2Int _startPos, Vector2Int _endPos, ref Cell[,] _map)
     {
         List<Vector2> posList = new List<Vector2>();
 
@@ -46,11 +48,14 @@ public class AStar
             return posList;
         }
 
+        mapLengthX = _map.GetLength(0);
+        mapLengthY = _map.GetLength(1);
+
         startCell.GScore = 0;
         startCell.HScore = CalculateDistanceCost(startCell, targetCell);
 
         List<Cell> openList = new List<Cell>();
-        HashSet<Cell> closedList = new HashSet<Cell>();
+        List<Cell> closedList = new List<Cell>();
 
         openList.Add(startCell);
 
@@ -99,16 +104,16 @@ public class AStar
         return posList;
     }
 
-    private void ResetMapScore(List<Cell> openList, HashSet<Cell> closedList)
+    private void ResetMapScore(List<Cell> openList, List<Cell> closedList)
     {
-        foreach (Cell cell in openList)
+        for (int i = 0; i < openList.Count; i++)
         {
-            cell.GScore = int.MaxValue;
+            openList[i].GScore = int.MaxValue;
         }
 
-        foreach (Cell cell in closedList)
+        for (int i = 0; i < closedList.Count; i++)
         {
-            cell.GScore = int.MaxValue;
+            closedList[i].GScore = int.MaxValue;
         }
     }
 
@@ -128,37 +133,53 @@ public class AStar
         return finalPath;
     }
 
-    private List<Cell> GetAvailableNeighbours(Cell _cell, Cell[,] _map, HashSet<Cell> _closed)
+    private List<Cell> GetAvailableNeighbours(Cell _cell, Cell[,] _map, List<Cell> _closed)
     {
         List<Cell> neighbours = new List<Cell>();
 
-        if (_cell.position.y + 1 < _map.GetLength(1) && !_cell.IsBlocked(_map[_cell.position.x, _cell.position.y + 1]))
+        Cell current = _map[_cell.position.x, _cell.position.y + 1];
+
+        if (_cell.position.y + 1 < mapLengthY && !_cell.IsBlocked(current))
         {
-            neighbours.Add(_map[_cell.position.x, _cell.position.y + 1]);
+            neighbours.Add(current);
         }
 
-        if (_cell.position.x + 1 < _map.GetLength(0) && !_cell.IsBlocked(_map[_cell.position.x + 1, _cell.position.y]))
+        current = _map[_cell.position.x + 1, _cell.position.y];
+
+        if (_cell.position.x + 1 < mapLengthX && !_cell.IsBlocked(current))
         {
-            neighbours.Add(_map[_cell.position.x + 1, _cell.position.y]);
+            neighbours.Add(current);
         }
 
-        if (_cell.position.y - 1 > 0 && !_cell.IsBlocked(_map[_cell.position.x, _cell.position.y - 1]))
+        current = _map[_cell.position.x, _cell.position.y - 1];
+
+        if (_cell.position.y - 1 > 0 && !_cell.IsBlocked(current))
         {
-            neighbours.Add(_map[_cell.position.x, _cell.position.y - 1]);
+            neighbours.Add(current);
         }
 
-        if (_cell.position.x - 1 > 0 && !_cell.IsBlocked(_map[_cell.position.x - 1, _cell.position.y]))
+        current = _map[_cell.position.x - 1, _cell.position.y];
+
+        if (_cell.position.x - 1 > 0 && !_cell.IsBlocked(current))
         {
-            neighbours.Add(_map[_cell.position.x - 1, _cell.position.y]);
+            neighbours.Add(current);
         }
 
         for (int i = 0; i < neighbours.Count;)
         {
-            if (_closed.Any(x => x.position == neighbours[i].position))
+            bool found = false;
+
+            for (int j = 0; j < _closed.Count; j++)
             {
-                neighbours.RemoveAt(i);
+                if (_closed[j].position == neighbours[i].position)
+                {
+                    neighbours.RemoveAt(i);
+                    found = true;
+                    break;
+                }
             }
-            else
+
+            if (!found)
             {
                 i++;
             }
@@ -169,9 +190,15 @@ public class AStar
 
     private int CalculateDistanceCost(Cell _a, Cell _b)
     {
-        int xDistance = Mathf.Abs(_a.position.x - _b.position.x);
-        int yDistance = Mathf.Abs(_a.position.y - _b.position.y);
+        int xDistance = Abs(_a.position.x - _b.position.x);
+        int yDistance = Abs(_a.position.y - _b.position.y);
 
         return xDistance + yDistance;
+    }
+
+    private int Abs(int _value)
+    {
+        if (_value >= 0) { return _value; }
+        else { return -_value; }
     }
 }

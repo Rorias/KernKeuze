@@ -108,7 +108,6 @@ public class NinjaBehaviour : AgentAI
             GameObject smokeBomb = Instantiate(prefabSmokeBomb, transform.position, Quaternion.identity);
             smokeBomb.GetComponent<SmokeBomb>().guard = guard.GetComponent<GuardBehaviour>();
             smokeBomb.GetComponent<SmokeBomb>().targetPos = guard.transform.position;
-            Debug.Log("Throwing bomb");
         }
     }
 

@@ -38,7 +38,7 @@ public class AgentAI : Character
 
     public void FindPathToTarget(Vector2 startPos, Vector2 endPos)
     {
-        path = AStar.Instance.FindPathToTarget(new Vector2Int(Mathf.RoundToInt(startPos.x - 0.5f), Mathf.RoundToInt(startPos.y - 0.5f)), new Vector2Int(Mathf.RoundToInt(endPos.x - 0.5f), Mathf.RoundToInt(endPos.y - 0.5f)), map.map);
+        path = AStar.Instance.FindPathToTarget(new Vector2Int(Mathf.RoundToInt(startPos.x - 0.5f), Mathf.RoundToInt(startPos.y - 0.5f)), new Vector2Int(Mathf.RoundToInt(endPos.x - 0.5f), Mathf.RoundToInt(endPos.y - 0.5f)), ref map.map);
     }
 
     public void UpdateBehaviourTextPos()
